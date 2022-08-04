@@ -1,0 +1,63 @@
+{
+    "icon": "",
+    "description": "sapdi.test02 Тестирование Jyp operator",
+    "processes": {
+        "jupyter1": {
+            "component": "com.sap.jupyter",
+            "metadata": {
+                "label": "JupyterOperatorTest",
+                "x": 186,
+                "y": 190,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "generation": 1,
+                "ui": "dynpath",
+                "config": {
+                    "notebookFilePath": "nb01"
+                },
+                "additionaloutports": [
+                    {
+                        "name": "outString",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "wiretap1": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 390,
+                "y": 190,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "ui": "dynpath",
+                "config": {}
+            }
+        }
+    },
+    "groups": [],
+    "connections": [
+        {
+            "metadata": {
+                "points": "310,230 385,230"
+            },
+            "src": {
+                "port": "outString",
+                "process": "jupyter1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap1"
+            }
+        }
+    ],
+    "inports": {},
+    "outports": {},
+    "properties": {},
+    "metadata": {
+        "generation": 1
+    }
+}

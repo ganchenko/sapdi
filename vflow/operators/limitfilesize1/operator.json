@@ -1,0 +1,25 @@
+{
+    "description": "limitfilesize1",
+    "component": "com.sap.system.golangExecutor2",
+    "inports": [
+        {
+            "name": "in",
+            "type": "message"
+        }
+    ],
+    "outports": [
+        {
+            "name": "out",
+            "type": "message"
+        }
+    ],
+    "icon": "forward",
+    "config": {
+        "$type": "http://sap.com/vflow/com.sap.scenarioTemplates.ABAP.fileSizeLimit.configSchema.json",
+        "codelanguage": "go",
+        "maxConcurrency": 1,
+        "maxsizekb": 1024,
+        "script": "package main\n\nimport (\n\t\"strconv\"\n)\n\nvar mysize=0\nvar mycounter=0\nvar mykblimit=1024\n\nvar GetInt func(string) int\nvar Out func(interface{})\n\nfunc main() {\n\n}\n\n\nfunc In(msg interface{}) {\n\n    if msg == nil {\n      return\n    }\n\n    mykblimit = GetInt(\"maxsizekb\")\n    \n    if mykblimit == 0 { mykblimit = 1024 }\n\n    mysize += len(msg.(map[string]interface{})[\"Body\"].(string))\n    if mysize \u003e= 1024 * mykblimit {\n      mycounter += 1\n      mysize = len(msg.(map[string]interface{})[\"Body\"].(string))\n    }\n     \n    msg.(map[string]interface{})[\"Attributes\"].(map[string]interface{})[\"ABAPfilenumber\"] = strconv.Itoa(mycounter)\n\n\tOut(msg)\n    \n}\n",
+        "scriptReference": "script.undefined"
+    }
+}

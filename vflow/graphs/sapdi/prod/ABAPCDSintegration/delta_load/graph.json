@@ -1,0 +1,352 @@
+{
+    "properties": {},
+    "description": "sapdi.prod.ABAPCDSintegration.delta_load Продуктивный пайплайн",
+    "processes": {
+        "abapcdsreader1": {
+            "component": "com.sap.abap.cds.reader",
+            "metadata": {
+                "label": "ABAP CDS Reader V2",
+                "x": 12,
+                "y": 57,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "generation": 1,
+                "config": {
+                    "connectionID": "EU_RISE_ECQ",
+                    "operatorID": "com.sap.abap.cds.reader.v2",
+                    "subscriptionType": "Existing",
+                    "action": "Delta Load",
+                    "cdsname": "I_GoodsMovementDocumentDEX",
+                    "wireformat": "Enhanced Format Conversions",
+                    "subscriptionID": "000D3ABF31491EDD84E5046E4C328988"
+                },
+                "additionaloutports": [
+                    {
+                        "name": "outMessageData",
+                        "type": "message"
+                    }
+                ]
+            }
+        },
+        "determinelastbatch11": {
+            "component": "determinelastbatch1",
+            "metadata": {
+                "label": "determinelastbatch1",
+                "x": 181,
+                "y": 57,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "checklastbatch11": {
+            "component": "checklastbatch1",
+            "metadata": {
+                "label": "checklastbatch1",
+                "x": 1468.9999952316284,
+                "y": 57,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "limitfilesize11": {
+            "component": "com.sap.scenarioTemplates.ABAP.fileSizeLimit",
+            "metadata": {
+                "label": "Limit File Size",
+                "x": 715.9999980926514,
+                "y": 57,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {}
+            },
+            "name": "limitfilesize1"
+        },
+        "fromfile1": {
+            "component": "com.sap.file.fromFile",
+            "metadata": {
+                "label": "From File",
+                "x": 1184.9999961853027,
+                "y": 72,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "workflowterminator1": {
+            "component": "com.sap.dh.terminator",
+            "metadata": {
+                "label": "Workflow Terminator",
+                "x": 1637.9999952316284,
+                "y": 57,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "writefile21": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Write File",
+                "x": 999.999997138977,
+                "y": 57,
+                "height": 80,
+                "width": 120,
+                "config": {
+                    "pathMode": "Static with placeholders",
+                    "path": "/shared//I_GoodsMovementDocumentDEX/file_delta_<header:ABAPfilenumber>.csv",
+                    "mode": "Append",
+                    "joinBatches": false,
+                    "connection": {
+                        "configurationType": "Connection Management",
+                        "connectionID": "DI_DATA_LAKE"
+                    }
+                }
+            },
+            "name": "writefile2"
+        },
+        "tofile1": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "x": 900.999997138977,
+                "y": 72,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "wiretap3": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 1299.9999952316284,
+                "y": 57,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "ui": "dynpath",
+                "config": {}
+            }
+        },
+        "python3operator11": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Python3 Operator",
+                "x": 350,
+                "y": 57,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "filesRequired": [
+                    "script.py"
+                ],
+                "generation": 1,
+                "config": {
+                    "script": "from io import StringIO\nimport csv\nimport pandas as pd\nimport json\n\nlastBatch = False\n\ndef on_input(inData):\n    # read body\n    data = StringIO(inData.body) \n    # read attributes\n    var = json.dumps(inData.attributes) \n    result = json.loads(var)\n    if result['message.lastBatch'] == False:\n        # from here we start json parsing \n        ABAP = result['ABAP']\n        Fields = ABAP['Fields']\n        columns = [] \n        for item in Fields:\n            columns.append(item['Name'])   \n        df = pd.read_csv(data, index_col = False, names = columns) \n        df_csv = df.to_csv(index = False, header = True)\n        api.send('outString', df_csv)\n    else: \n        api.send('out', 'OK')\n\napi.set_port_callback('inData', on_input)\n"
+                },
+                "additionalinports": [
+                    {
+                        "name": "inData",
+                        "type": "message"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "outString",
+                        "type": "string"
+                    },
+                    {
+                        "name": "out",
+                        "type": "string"
+                    }
+                ]
+            },
+            "name": "python3operator1"
+        },
+        "graphterminator1": {
+            "component": "com.sap.util.graphTerminator",
+            "metadata": {
+                "label": "Graph Terminator",
+                "x": 534.9999990463257,
+                "y": 102,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "tomessageconverter1": {
+            "component": "com.sap.util.toMessageConverter",
+            "metadata": {
+                "label": "ToMessage Converter",
+                "x": 567.4999990463257,
+                "y": 12,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            }
+        }
+    },
+    "groups": [],
+    "connections": [
+        {
+            "metadata": {
+                "points": "1592.9999952316284,97 1632.9999952316284,97"
+            },
+            "src": {
+                "port": "finished",
+                "process": "checklastbatch11"
+            },
+            "tgt": {
+                "port": "stop",
+                "process": "workflowterminator1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1123.999997138977,88 1151.99999666214,88 1151.99999666214,97 1179.9999961853027,97"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile21"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "fromfile1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "136,97 176,97"
+            },
+            "src": {
+                "port": "outMessageData",
+                "process": "abapcdsreader1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "determinelastbatch11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "954.999997138977,97 994.999997138977,97"
+            },
+            "src": {
+                "port": "file",
+                "process": "tofile1"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile21"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1238.9999961853027,88 1266.9999957084656,88 1266.9999957084656,97 1294.9999952316284,97"
+            },
+            "src": {
+                "port": "path",
+                "process": "fromfile1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap3"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1423.9999952316284,97 1463.9999952316284,97"
+            },
+            "src": {
+                "port": "out",
+                "process": "wiretap3"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "checklastbatch11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "474,106 501.99999952316284,106 501.99999952316284,142 529.9999990463257,142"
+            },
+            "src": {
+                "port": "out",
+                "process": "python3operator11"
+            },
+            "tgt": {
+                "port": "stop",
+                "process": "graphterminator1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "305,97 345,97"
+            },
+            "src": {
+                "port": "out",
+                "process": "determinelastbatch11"
+            },
+            "tgt": {
+                "port": "inData",
+                "process": "python3operator11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "474,88 501.99999952316284,88 501.99999952316284,28 562.4999990463257,28"
+            },
+            "src": {
+                "port": "outString",
+                "process": "python3operator11"
+            },
+            "tgt": {
+                "port": "inbody",
+                "process": "tomessageconverter1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "621.4999990463257,37 682.9999985694885,37 682.9999985694885,97 710.9999980926514,97"
+            },
+            "src": {
+                "port": "out",
+                "process": "tomessageconverter1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "limitfilesize11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "839.9999980926514,97 868,97 868,106 895.999997138977,106"
+            },
+            "src": {
+                "port": "out",
+                "process": "limitfilesize11"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "tofile1"
+            }
+        }
+    ],
+    "inports": {},
+    "outports": {},
+    "metadata": {
+        "generation": 1
+    }
+}

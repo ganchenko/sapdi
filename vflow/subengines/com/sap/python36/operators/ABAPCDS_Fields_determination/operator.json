@@ -1,0 +1,21 @@
+{
+    "description": "ABAPCDS_Fields_determination",
+    "component": "com.sap.system.python3Operator",
+    "inports": [
+        {
+            "name": "inData",
+            "type": "message"
+        }
+    ],
+    "outports": [
+        {
+            "name": "outString",
+            "type": "string"
+        }
+    ],
+    "iconsrc": "python.svg",
+    "config": {
+        "script": "from io import StringIO\nimport csv\nimport pandas as pd\nimport json\ndef on_input(inData):\n    data = StringIO(inData.body) \n    var = json.dumps(inData.attributes) \n    result = json.loads(var)\n    ABAP = result['ABAP']\n    Fields = ABAP['Fields']\n    columns = [] \n    for item in Fields:\n        columns.append(item['Name'])   \n    df = pd.read_csv(data, index_col = False, names = columns) \n    df_csv = df.to_csv(index = False, header = True)\n    api.send('outString', df_csv)\napi.set_port_callback('inData', on_input)",
+        "scriptReference": "script.py"
+    }
+}

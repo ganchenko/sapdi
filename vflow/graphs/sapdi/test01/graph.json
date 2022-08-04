@@ -1,0 +1,301 @@
+{
+    "description": "sapdi.test01",
+    "processes": {
+        "abapcdsreader11": {
+            "component": "com.sap.abap.cds.reader",
+            "metadata": {
+                "label": "ABAP CDS Reader V1",
+                "x": 12,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "generation": 1,
+                "config": {
+                    "connectionID": "EU_RISE_ECQ",
+                    "operatorID": "com.sap.abap.cds.reader.v1",
+                    "subscriptionType": "New",
+                    "action": "Initial Load",
+                    "cdsname": "C_PURCHASEORDERITEMDEX",
+                    "subscriptionName": "ECQ_C_PURCHASEORDERITEMDEX_09"
+                },
+                "additionaloutports": [
+                    {
+                        "name": "outData",
+                        "type": "abap.*"
+                    }
+                ]
+            },
+            "name": "abapcdsreader1"
+        },
+        "abapconverter11": {
+            "component": "com.sap.abap.stringConverter",
+            "metadata": {
+                "label": "ABAP Converter",
+                "x": 181,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "generation": 1,
+                "config": {
+                    "operatorID": "com.sap.abap.toStringConverter"
+                },
+                "additionalinports": [
+                    {
+                        "name": "in",
+                        "type": "abap.*"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "out",
+                        "type": "string"
+                    }
+                ]
+            },
+            "name": "abapconverter1"
+        },
+        "tomessageconverter11": {
+            "component": "com.sap.util.toMessageConverter",
+            "metadata": {
+                "label": "ToMessage Converter",
+                "x": 365.9999990463257,
+                "y": 27,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "tomessageconverter1"
+        },
+        "determinelastbatch111": {
+            "component": "determinelastbatch1",
+            "metadata": {
+                "label": "determinelastbatch1",
+                "x": 464.9999990463257,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "determinelastbatch11"
+        },
+        "limitfilesize111": {
+            "component": "limitfilesize1",
+            "metadata": {
+                "label": "limitfilesize1",
+                "x": 633.9999990463257,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "limitfilesize11"
+        },
+        "checklastbatch111": {
+            "component": "checklastbatch1",
+            "metadata": {
+                "label": "checklastbatch1",
+                "x": 1217.9999961853027,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "checklastbatch11"
+        },
+        "graphterminator11": {
+            "component": "com.sap.util.graphTerminator",
+            "metadata": {
+                "label": "Graph Terminator",
+                "x": 1386.9999961853027,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "graphterminator1"
+        },
+        "tofile11": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "x": 818.9999980926514,
+                "y": 27,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "tofile1"
+        },
+        "writefile11": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Write File",
+                "x": 917.9999980926514,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "config": {
+                    "connection": {
+                        "configurationType": "Connection Management",
+                        "connectionID": "DI_DATA_LAKE"
+                    },
+                    "pathMode": "Static (from configuration)",
+                    "path": "/shared/tmp/ECQ_C_PURCHASEORDERITEMDEX_09",
+                    "mode": "Append"
+                }
+            },
+            "name": "writefile1"
+        },
+        "fromfile11": {
+            "component": "com.sap.file.fromFile",
+            "metadata": {
+                "label": "From File",
+                "x": 1102.999997138977,
+                "y": 27,
+                "height": 50,
+                "width": 50,
+                "generation": 1,
+                "config": {}
+            },
+            "name": "fromfile1"
+        }
+    },
+    "groups": [],
+    "connections": [
+        {
+            "metadata": {
+                "points": "136,52 176,52"
+            },
+            "src": {
+                "port": "outData",
+                "process": "abapcdsreader11"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "abapconverter11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "305,52 332.99999952316284,52 332.99999952316284,43 360.9999990463257,43"
+            },
+            "src": {
+                "port": "out",
+                "process": "abapconverter11"
+            },
+            "tgt": {
+                "port": "inbody",
+                "process": "tomessageconverter11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "419.9999990463257,52 459.9999990463257,52"
+            },
+            "src": {
+                "port": "out",
+                "process": "tomessageconverter11"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "determinelastbatch111"
+            }
+        },
+        {
+            "metadata": {
+                "points": "588.9999990463257,52 628.9999990463257,52"
+            },
+            "src": {
+                "port": "out",
+                "process": "determinelastbatch111"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "limitfilesize111"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1341.9999961853027,52 1381.9999961853027,52"
+            },
+            "src": {
+                "port": "finished",
+                "process": "checklastbatch111"
+            },
+            "tgt": {
+                "port": "stop",
+                "process": "graphterminator11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "757.9999990463257,52 785.9999985694885,52 785.9999985694885,43 813.9999980926514,43"
+            },
+            "src": {
+                "port": "out",
+                "process": "limitfilesize111"
+            },
+            "tgt": {
+                "port": "path",
+                "process": "tofile11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "872.9999980926514,52 912.9999980926514,52"
+            },
+            "src": {
+                "port": "file",
+                "process": "tofile11"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1041.9999980926514,43 1069.9999976158142,43 1069.9999976158142,52 1097.999997138977,52"
+            },
+            "src": {
+                "port": "file",
+                "process": "writefile11"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "fromfile11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1156.999997138977,43 1184.99999666214,43 1184.99999666214,52 1212.9999961853027,52"
+            },
+            "src": {
+                "port": "path",
+                "process": "fromfile11"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "checklastbatch111"
+            }
+        }
+    ],
+    "inports": {},
+    "outports": {},
+    "properties": {},
+    "metadata": {
+        "generation": 1
+    }
+}

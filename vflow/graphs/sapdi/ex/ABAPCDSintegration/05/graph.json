@@ -1,0 +1,112 @@
+{
+    "properties": {},
+    "description": "sapdi.ex.ABAPCDSintegration.04 Тест CDS Reader V2 для нач загрузки с именами полей",
+    "processes": {
+        "abapcdsreader1": {
+            "component": "com.sap.abap.cds.reader",
+            "metadata": {
+                "label": "ABAP CDS Reader V2",
+                "x": 12,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "generation": 1,
+                "config": {
+                    "connectionID": "EU_RISE_ECQ",
+                    "operatorID": "com.sap.abap.cds.reader.v2",
+                    "subscriptionType": "New",
+                    "action": "Replication",
+                    "cdsname": "I_GoodsMovementDocumentDEX",
+                    "subscriptionName": "ECQ_I_I_GoodsMovementDocumentDEX_50",
+                    "chunkSize": 1000,
+                    "wireformat": "Enhanced Format Conversions"
+                },
+                "additionaloutports": [
+                    {
+                        "name": "outMessageData",
+                        "type": "message"
+                    }
+                ]
+            }
+        },
+        "wiretap1": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 350,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "generation": 1,
+                "ui": "dynpath",
+                "config": {}
+            }
+        },
+        "python3operator11": {
+            "component": "com.sap.system.python3Operator",
+            "metadata": {
+                "label": "Python3 Operator",
+                "x": 181,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "filesRequired": [
+                    "script.py"
+                ],
+                "generation": 1,
+                "config": {
+                    "script": "from io import StringIO\nimport csv\nimport pandas as pd\nimport json\ndef on_input(inData):\n    data = StringIO(inData.body) \n    var = json.dumps(inData.attributes) \n    result = json.loads(var)\n    ABAP = result['ABAP']\n    Fields = ABAP['Fields']\n    columns = [] \n    for item in Fields:\n        columns.append(item['Name'])   \n    df = pd.read_csv(data, index_col = False, names = columns) \n    df_csv = df.to_csv(index = False, header = True)\n    api.send('outString', df_csv)\napi.set_port_callback('inData', on_input)"
+                },
+                "additionalinports": [
+                    {
+                        "name": "inData",
+                        "type": "message"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "outString",
+                        "type": "string"
+                    }
+                ]
+            },
+            "name": "python3operator1"
+        }
+    },
+    "groups": [],
+    "connections": [
+        {
+            "metadata": {
+                "points": "136,52 176,52"
+            },
+            "src": {
+                "port": "outMessageData",
+                "process": "abapcdsreader1"
+            },
+            "tgt": {
+                "port": "inData",
+                "process": "python3operator11"
+            }
+        },
+        {
+            "metadata": {
+                "points": "305,52 345,52"
+            },
+            "src": {
+                "port": "outString",
+                "process": "python3operator11"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap1"
+            }
+        }
+    ],
+    "inports": {},
+    "outports": {},
+    "metadata": {
+        "generation": 1
+    }
+}

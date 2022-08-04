@@ -1,0 +1,183 @@
+{
+    "properties": {},
+    "description": "sapdi.ex.ABAPCDSintegration.01 Рабочий пайплайн",
+    "processes": {
+        "abapcdsreader1": {
+            "component": "com.sap.abap.cds.reader",
+            "metadata": {
+                "label": "ABAP CDS Reader V2",
+                "extensible": true,
+                "generation": 1,
+                "config": {
+                    "connectionID": "EU_RISE_ECQ",
+                    "operatorID": "com.sap.abap.cds.reader.v2",
+                    "subscriptionType": "New",
+                    "action": "Initial Load",
+                    "cdsname": "I_GoodsMovementDocument",
+                    "subscriptionName": "ECQ_I_GoodsMovementDocument_01",
+                    "chunkSize": 1000,
+                    "wireformat": "Enhanced Format Conversions"
+                },
+                "additionaloutports": [
+                    {
+                        "name": "outMessageData",
+                        "type": "message"
+                    }
+                ]
+            }
+        },
+        "determinelastbatch11": {
+            "component": "determinelastbatch1",
+            "metadata": {
+                "label": "determinelastbatch1",
+                "extensible": true,
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "checklastbatch11": {
+            "component": "checklastbatch1",
+            "metadata": {
+                "label": "checklastbatch1",
+                "extensible": true,
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "limitfilesize11": {
+            "component": "com.sap.scenarioTemplates.ABAP.fileSizeLimit",
+            "metadata": {
+                "label": "Limit File Size",
+                "extensible": true,
+                "config": {}
+            },
+            "name": "limitfilesize1"
+        },
+        "tofile1": {
+            "component": "com.sap.file.toFile",
+            "metadata": {
+                "label": "To File",
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "fromfile1": {
+            "component": "com.sap.file.fromFile",
+            "metadata": {
+                "label": "From File",
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "workflowterminator1": {
+            "component": "com.sap.dh.terminator",
+            "metadata": {
+                "label": "Workflow Terminator",
+                "generation": 1,
+                "config": {}
+            }
+        },
+        "writefile21": {
+            "component": "com.sap.file.write",
+            "metadata": {
+                "label": "Write File",
+                "config": {
+                    "pathMode": "Static with placeholders",
+                    "path": "/shared/tmp/I_GoodsMovementDocument_<header:ABAPfilenumber>.csv",
+                    "mode": "Append",
+                    "joinBatches": false,
+                    "connection": {
+                        "configurationType": "Connection Management",
+                        "connectionID": "DI_DATA_LAKE"
+                    }
+                }
+            },
+            "name": "writefile2"
+        }
+    },
+    "groups": [],
+    "connections": [
+        {
+            "metadata": {},
+            "src": {
+                "port": "out",
+                "process": "determinelastbatch11"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "limitfilesize11"
+            }
+        },
+        {
+            "metadata": {},
+            "src": {
+                "port": "out",
+                "process": "limitfilesize11"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "tofile1"
+            }
+        },
+        {
+            "metadata": {},
+            "src": {
+                "port": "message",
+                "process": "fromfile1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "checklastbatch11"
+            }
+        },
+        {
+            "metadata": {},
+            "src": {
+                "port": "finished",
+                "process": "checklastbatch11"
+            },
+            "tgt": {
+                "port": "stop",
+                "process": "workflowterminator1"
+            }
+        },
+        {
+            "metadata": {},
+            "src": {
+                "port": "file",
+                "process": "tofile1"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "writefile21"
+            }
+        },
+        {
+            "metadata": {},
+            "src": {
+                "port": "file",
+                "process": "writefile21"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "fromfile1"
+            }
+        },
+        {
+            "metadata": {},
+            "src": {
+                "port": "outMessageData",
+                "process": "abapcdsreader1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "determinelastbatch11"
+            }
+        }
+    ],
+    "inports": {},
+    "outports": {},
+    "metadata": {
+        "generation": 1
+    }
+}

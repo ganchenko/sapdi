@@ -1,0 +1,24 @@
+{
+    "description": "checklastbatch1",
+    "component": "com.sap.system.golangExecutor2",
+    "inports": [
+        {
+            "name": "in",
+            "type": "message"
+        }
+    ],
+    "outports": [
+        {
+            "name": "finished",
+            "type": "string"
+        }
+    ],
+    "icon": "flag-checkered",
+    "config": {
+        "$type": "http://sap.com/vflow/com.sap.scenarioTemplates.ABAP.checkLastBatch.configSchema.json",
+        "codelanguage": "go",
+        "maxConcurrency": 1,
+        "script": "package main\n\nfunc main() {\n\n}\n\nvar Finished func(interface{})\nvar Out func(interface{})\n\nfunc In(msg interface{}) {\n    \n if msg.(map[string]interface{})[\"Attributes\"].(map[string]interface{})[\"message.lastBatch\"] == \"true\" {\n     if Finished != nil {\n       Finished(\"true\")\n     }\n }\n \n\n}",
+        "scriptReference": "script.undefined"
+    }
+}

@@ -1,0 +1,24 @@
+{
+    "description": "determinelastbatch1",
+    "component": "com.sap.system.golangExecutor2",
+    "inports": [
+        {
+            "name": "in",
+            "type": "message"
+        }
+    ],
+    "outports": [
+        {
+            "name": "out",
+            "type": "message"
+        }
+    ],
+    "icon": "flag-o",
+    "config": {
+        "$type": "http://sap.com/vflow/com.sap.scenarioTemplates.ABAP.determineLastBatch.configSchema.json",
+        "codelanguage": "go",
+        "maxConcurrency": 1,
+        "script": "package main\n\nfunc main() {\n\n}\nvar CopyMessage func(map[string]interface{}) (map[string]interface{}, error)\nvar Out func(interface{})\n\nfunc In(msg interface{}) {\n\n    if ( msg.(map[string]interface{}) == nil ) || ( msg.(map[string]interface{})[\"Body\"] == nil ) {\n      return\n    }\n\n    m, err := CopyMessage(msg.(map[string]interface{}))\n    if err != nil {\n        panic(err)\n    }\n\n    //finish if empty string is sent\n    if ( msg.(map[string]interface{})[\"Body\"].(string) == \"\" ) ||\n       ( msg.(map[string]interface{})[\"Body\"].(string)[:1] == \"\\n\" ) ||\n       ( msg.(map[string]interface{})[\"Body\"].(string) == \"{\\\"DATA\\\":\\\"\\\"}\" ) ||\n       ( msg.(map[string]interface{})[\"Body\"].(string)[1:] == \n         \"\u003c?xml version=\\\"1.0\\\" encoding=\\\"utf-16\\\"?\u003e\u003casx:abap xmlns:asx=\\\"http://www.sap.com/abapxml\\\" version=\\\"1.0\\\"\u003e\u003casx:values\u003e\u003cDATA/\u003e\u003c/asx:values\u003e\u003c/asx:abap\u003e\" ) {\n     m[\"Attributes\"].(map[string]interface{})[\"message.lastBatch\"] = \"true\"\n     m[\"Attributes\"].(map[string]interface{})[\"ABAPlastBatch\"] = \"true\"\n    } else {\n     m[\"Attributes\"].(map[string]interface{})[\"ABAPlastBatch\"] = \"false\"\n    }\n\n  \tmsg.(map[string]interface{})[\"Attributes\"] = m[\"Attributes\"]\n    \n\tOut(msg)\n    \n}\n",
+        "scriptReference": "script.undefined"
+    }
+}
