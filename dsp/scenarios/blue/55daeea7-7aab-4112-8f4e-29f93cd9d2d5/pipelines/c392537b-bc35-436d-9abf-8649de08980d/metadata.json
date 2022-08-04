@@ -1,0 +1,9 @@
+{
+    "description": "Python",
+    "name": "P01",
+    "fromTemplate": "com.sap.dsp.templates.python_producer_template",
+    "createdAt": "2022-07-19T09:21:06Z",
+    "createdBy": "sap-di-admin",
+    "modifiedAt": "2022-07-19T09:21:06Z",
+    "modifiedBy": "sap-di-admin"
+}

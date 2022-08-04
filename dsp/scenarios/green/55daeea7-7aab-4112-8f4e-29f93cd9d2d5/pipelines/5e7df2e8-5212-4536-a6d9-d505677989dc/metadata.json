@@ -1,0 +1,9 @@
+{
+    "description": "",
+    "name": "P02",
+    "fromTemplate": "com.sap.dsp.templates.python_consumer_template",
+    "createdAt": "2022-07-19T09:23:31Z",
+    "createdBy": "sap-di-admin",
+    "modifiedAt": "2022-07-19T09:23:31Z",
+    "modifiedBy": "sap-di-admin"
+}
